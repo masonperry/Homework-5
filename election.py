@@ -50,14 +50,14 @@ def state_edges(election_result_rows):
         *StateEdges*: 
             dictionary from *State* (string) to *Edge* (float)
     """
-    #According to what I found on github, This is suppose to initializer an empty dictionary so I can add to it in the loop 
-    answer = {}
+    # This is suppose to initializer an empty dictionary so I can add to it in the loop 
+    solution = {}
     # The for loop is used to go throgh each item in the list (or rows in this case)
     for i in range(len(election_result_rows)):	
         # here is where information is being added into the answer dictionary
-        answer[election_result_rows[i]["State"]] = row_to_edge(election_result_rows[i])
+        solution[election_result_rows[i]["State"]] = row_to_edge(election_result_rows[i])
     #Result is returned
-        return answer 
+        return solution 
 
 ################################################################################
 # Problem 2: Find the most recent poll row
@@ -86,7 +86,7 @@ def most_recent_poll_row(poll_rows, pollster, state):
         None, if no such row exists
     """
     tempList = []
-    resp = None
+    x = None
     for row in poll_rows:
         if row.get("State") == state and row.get("Pollster") == pollster:
             tempList.append(row)
@@ -96,9 +96,9 @@ def most_recent_poll_row(poll_rows, pollster, state):
             tempList.insert(0,tempList[index+1])
     
     if len(tempList) > 1:
-        resp = tempList[0]
-    print (resp)
-    return resp
+        x = tempList[0]
+    print (x)
+    return x
 
 
 ################################################################################
@@ -356,3 +356,4 @@ if __name__ == "__main__":
 ###
 
 # ... Write your answer here, as a comment (on lines starting with "#").
+#I did have some outside help to point me in the right direction, I looked on Github at other Homework 5 Election.py codes to get an idea.
