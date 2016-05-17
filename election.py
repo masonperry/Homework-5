@@ -10,10 +10,8 @@ import time
 
 def read_csv(path):
     """Reads the CSV file at path, and returns a list of rows from the file.
-
     Parameters:
         path: path to a CSV file. 
-
     Returns:
         list of dictionaries: Each dictionary maps the columns of the CSV file
         to the values found in one row of the CSV file. Although this function 
@@ -34,10 +32,8 @@ def read_csv(path):
 def row_to_edge(row):
     """Given an *ElectionDataRow* or *PollDataRow*, returns the 
     Democratic *Edge* in that *State*.
-
     Parameters:
         row: an *ElectionDataRow* or *PollDataRow* for a particular *State*
-
     Returns:
         Democratic *Edge* in that *State*: a float
     """
@@ -46,17 +42,15 @@ def row_to_edge(row):
  
 def state_edges(election_result_rows):
     """Given a list of *ElectionDataRow*s, returns *StateEdge*s.
-
     Parameters:
         election_result_rows: list of *ElectionDataRow*s 
             This list has no duplicate *States*; that is, each *State* is 
             represented at most once in the input list.
-
     Returns:
         *StateEdges*: 
             dictionary from *State* (string) to *Edge* (float)
     """
-    #This is initializing an empty dic so I can add to it in the loop 
+    #According to what I found on github, This is suppose to initializer an empty dictionary so I can add to it in the loop 
     answer = {}
     # The for loop is used to go throgh each item in the list (or rows in this case)
     for i in range(len(election_result_rows)):	
@@ -71,11 +65,9 @@ def state_edges(election_result_rows):
 
 def earlier_date(date1, date2):
     """Given two dates as strings, returns True if date1 is before date2.
-
     Parameters:
         date1: a string representing a date (formatted like "Oct 06 2012")
         date2: a string representing a date (formatted like "Oct 06 2012")
-
     Returns:
         bool: True if date1 is before date2.
     """
@@ -85,17 +77,29 @@ def earlier_date(date1, date2):
 def most_recent_poll_row(poll_rows, pollster, state):
     """ Given a list of *PollDataRow*s, returns the most recent row with the
     specified *Pollster* and *State*. If no such row exists, returns None.
-
     Parameters:
         poll_rows: a list of *PollDataRow*s
         pollster: a string representing a *Pollster*
         state: a string representing a *State*
-
     Returns:
         A *PollDataRow*: a dictionary from string to string  OR 
         None, if no such row exists
     """
- 
+    tempList = []
+    resp = None
+    for row in poll_rows:
+        if row.get("State") == state and row.get("Pollster") == pollster:
+            tempList.append(row)
+    
+    for index in range(0,len(tempList)-1):
+        if earlier_date(tempList[index].get("Date"),tempList[index+1].get("Date")):
+            tempList.insert(0,tempList[index+1])
+    
+    if len(tempList) > 1:
+        resp = tempList[0]
+    print (resp)
+    return resp
+
 
 ################################################################################
 # Problem 3: Pollster predictions
@@ -104,7 +108,6 @@ def most_recent_poll_row(poll_rows, pollster, state):
 def unique_column_values(rows, column_name):
     """Given a list of rows and the name of a column (a string), 
     returns a set containing all values in that column.
-
     Parmeters:
         rows: a list of rows (could be a *PollDataRow* or another type of row)
         column_name: a string
@@ -112,20 +115,25 @@ def unique_column_values(rows, column_name):
     Returns:
         A set: containing all unique values in column `column_name`
     """
-    #TODO: Implement this function
-    pass
-
+    response = set()
+    
+    for row in rows:
+        response.append(row.get(column_name))
+    
+    return response
 
 def pollster_predictions(poll_rows):
     """Given a list of *PollDataRow*s, returns *PollsterPredictions*.
     For a given pollster, uses only the most recent poll for a state.
-
     Parameters:
         poll_rows: a list of *PollDataRow*s
-
     Returns:
         A *PollsterPredictions*: a dictionary from *Pollster* to *StateEdges*
     """
+    response = []
+    
+    for row in poll_rows:
+        response.append({row.get("Pollster"): {row.get("State"):(float(row.get("Dem"))-float(row.get("Rep")))}})
    
 
 ################################################################################
@@ -135,14 +143,11 @@ def pollster_predictions(poll_rows):
 def average_error(state_edges_predicted, state_edges_actual):
     """Given predicted *StateEdges* and actual *StateEdges*, returns
     the average error of the prediction.
-
     For each state present in state_edges_predicted, its error is
     calculated.  The average of all of these errors is returned.
-
     Parameters:
         state_edges_predicted: *StateEdges*, a dictionary from *State* to *Edge*
         state_edges_actual: *StateEdges*, a dictionary from *State* to *Edge*
-
     Returns:
         float: the average error
     """
@@ -152,12 +157,10 @@ def average_error(state_edges_predicted, state_edges_actual):
 def pollster_errors(pollster_predictions, state_edges_actual):
     """Given *PollsterPredictions* and actual *StateEdges*, 
     retuns *PollsterErrors*.
-
     Parameters:
         pollster_predictions: *PollsterPredictionss*, dictionary from *Pollster*
             to *StateEdges*
         state_edges_actual: *StateEdges*, dictionary from *State* to *Edge*
-
     Returns:
         *PollsterErrors*: a dictionary from *Pollster* to float (The float
         represents the *Pollster*'s average error).
@@ -172,7 +175,6 @@ def pollster_errors(pollster_predictions, state_edges_actual):
 def pivot_nested_dict(nested_dict):
     """Pivots a nested dictionary, producing a different nested dictionary
     containing the same values.
-
     The input is a dictionary d1 that maps from keys k1 to dictionaries d2,
     where d2 maps from keys k2 to values v.
     The output is a dictionary d3 that maps from keys k2 to dictionaries d4,
@@ -192,11 +194,9 @@ def pivot_nested_dict(nested_dict):
 
 def average_error_to_weight(error):
     """Given the average error of a *Pollster*, returns that pollster's weight.
-
     Parameters:
         error: a float representing a *Pollster*'s average error, 
             The error must be a positive number.
-
     Returns:
         float: weight, calculated as 1/(error)^2
     """
@@ -209,11 +209,9 @@ DEFAULT_AVERAGE_ERROR = 5.0
 def pollster_to_weight(pollster, pollster_errors):
     """"Given a *Pollster* and a *PollsterErrors*, return 
     the given pollster's weight.
-
     Parameters:
         pollster: *Pollster*, a string
         pollster_errors: *PollsterErrors*, a dictionary from *Pollster* to float
-
     Returns:
         float: weight
     """
@@ -226,13 +224,11 @@ def pollster_to_weight(pollster, pollster_errors):
 
 def weighted_average(items, weights):
     """Returns the weighted average of a list of items.
-
     Parameters:
         items: a list of numbers.
         weights: a list of numbers, whose sum is nonzero.
             Each weight in weights corresponds to the item in items at 
             the same index. items and weights must be the same length.
-
     Returns:
         float: the weighted average, the sum of (product of each item and 
         its weight) divided by (the sum of the weights)
@@ -248,7 +244,6 @@ def average_edge(pollster_edges, pollster_errors):
     Parameters:
         pollster_edges: *PollsterEdges*, a dictionary from *Pollster* to *Edge*
         pollster_errors: *PollsterErrors*, a dictionary from *Pollster* to float
-
     Returns:
         float: the weighted average of the *Edge*s, weighted by the errors
     """
@@ -262,12 +257,10 @@ def average_edge(pollster_edges, pollster_errors):
 def predict_state_edges(pollster_predictions, pollster_errors):
     """Given *PollsterPredictions* from a current election and *PollsterErrors*
     from a past election, returns predicted *StateEdges* of the current election.
-
     Parameters:
         pollster_predictions: *PollsterPredictions*, a dictionary from 
             *Pollster* to *StateEdges*
         pollster_errors: *PollsterErrors*, a dictionary from *Pollster* to float
-
     Returns:
         *StateEdges*: predicted *StateEdges* of the current election
     """
@@ -281,7 +274,6 @@ def predict_state_edges(pollster_predictions, pollster_errors):
 def electoral_college_outcome(ec_rows, state_edges):
     """Given electoral college rows and *StateEdges*, returns the outcome of
     the Electoral College.
-
     Parameters:
         ec_rows: a list of electoral college rows, where an electoral college
             row is a dictionary from string to string (similar to an
@@ -314,7 +306,6 @@ def electoral_college_outcome(ec_rows, state_edges):
 def print_dict(dictionary):
     """Given a dictionary, prints its contents in sorted order by key.
     Rounds float values to 8 decimal places.
-
     Returns:
         None
     """
